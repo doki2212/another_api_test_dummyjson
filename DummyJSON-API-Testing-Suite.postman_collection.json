@@ -1,0 +1,521 @@
+{
+	"info": {
+		"_postman_id": "e8459edd-7a42-4d66-ac51-c22d13ac02fa",
+		"name": "Dummy JSON - API Testing Suite",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "46907681",
+		"_collection_link": "https://chrisochristudhas.postman.co/workspace/Testing~bf93fcfc-dd0c-48d0-89e2-692337141276/collection/46907681-e8459edd-7a42-4d66-ac51-c22d13ac02fa?action=share&source=collection_link&creator=46907681"
+	},
+	"item": [
+		{
+			"name": "01 - Get all products",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let productsResponse = pm.response.json();\r",
+							"\r",
+							"pm.test(\"products is an array\", () => {\r",
+							"    pm.expect(productsResponse.products).to.be.an(\"array\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"products length > 0\", () => {\r",
+							"    pm.expect(productsResponse.products.length).to.be.greaterThan(0);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"First product has price field\", () => {\r",
+							"    pm.expect(productsResponse.products[0]).to.have.property(\"price\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/products",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "02 – Get Products (Paginated)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let paginated = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Limit equals 5\", () => {\r",
+							"    pm.expect(paginated.limit).to.eql(5);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Skip equals 10\", () => {\r",
+							"    pm.expect(paginated.skip).to.eql(10);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Returned products count <= limit\", () => {\r",
+							"    pm.expect(paginated.products.length).to.be.at.most(5);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/products?limit=5&skip=10",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"products"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "5"
+						},
+						{
+							"key": "skip",
+							"value": "10"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "03 – Search Products (q=phone)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let searchResult = pm.response.json();\r",
+							"\r",
+							"pm.test(\"At least one search result\", () => {\r",
+							"    pm.expect(searchResult.products.length).to.be.greaterThan(0);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"At least one result contains 'phone' in title or description\", () => {\r",
+							"    const found = searchResult.products.some(p =>\r",
+							"        (p.title + \" \" + (p.description || \"\")).toLowerCase().includes(\"phone\")\r",
+							"    );\r",
+							"    pm.expect(found).to.be.true;\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/products/search?q=phone",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"products",
+						"search"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "phone"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "04 – Get Products by Category (smartphones)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let categoryResult = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Category returns products\", () => {\r",
+							"    pm.expect(categoryResult.products.length).to.be.greaterThan(0);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"First product is in smartphones category\", () => {\r",
+							"    pm.expect(categoryResult.products[0].category.toLowerCase()).to.include(\"smartphones\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/products/category/smartphones",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"products",
+						"category",
+						"smartphones"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "05 – Get Single Product (id = 1)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Product has required fields\", () => {\r",
+							"    pm.expect(json).to.have.property(\"id\");\r",
+							"    pm.expect(json).to.have.property(\"title\");\r",
+							"    pm.expect(json).to.have.property(\"price\");\r",
+							"    pm.expect(json).to.have.property(\"stock\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Field types are correct\", () => {\r",
+							"    pm.expect(json.id).to.be.a(\"number\");\r",
+							"    pm.expect(json.title).to.be.a(\"string\");\r",
+							"    pm.expect(json.price).to.be.a(\"number\");\r",
+							"    pm.expect(json.stock).to.be.a(\"number\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/products/1",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"products",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "06 - Create Product",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Status is 200 or 201\", () => {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Product has id\", () => {\r",
+							"    pm.expect(json).to.have.property(\"id\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Title is correct\", () => {\r",
+							"    pm.expect(json.title).to.eql(\"Postman Test Product\");\r",
+							"});\r",
+							"\r",
+							"pm.environment.set(\"product_id\", json.id);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"Postman Test Product\",\r\n  \"price\": 100\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/products/add",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"products",
+						"add"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "06 - Create product (POST - DDT)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Status is 201 or 200\", () => {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+							"});\r",
+							"\r",
+							"// Compare response with CSV data\r",
+							"pm.test(\"Title matches CSV input\", () => {\r",
+							"    pm.expect(json.title).to.eql(pm.iterationData.get(\"title\"));\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Price matches CSV input\", () => {\r",
+							"    pm.expect(json.price).to.eql(pm.iterationData.get(\"price\"));\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"{{title}}\",\r\n  \"price\": {{price}}\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/products/add",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"products",
+						"add"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "07 - Get product by ID (negative – DummyJSON doesn’t persist)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Status is 404 (product not really stored)\", () => {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Error message mentions not found\", () => {\r",
+							"    pm.expect(json.message.toLowerCase()).to.include(\"not found\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/products/{{product_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"products",
+						"{{product_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "08 - Get existing product (ID = 1)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Status is 200\", () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"ID is 1\", () => {\r",
+							"    pm.expect(json.id).to.eql(1);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/products/1",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"products",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "09 - Update product (negative – DummyJSON doesn't persist)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Status is 404 because product does not really exist\", () => {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Error message mentions not found\", () => {\r",
+							"    pm.expect(json.message.toLowerCase()).to.include(\"not found\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"Updated Test Product\",\r\n  \"price\": 150\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/products/{{product_id}}\n",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"products",
+						"{{product_id}}\n"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "10 - Update existing product (PUT)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Status is 404 because DummyJSON does not support DELETE\", () => {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Error message contains 'not found'\", () => {\r",
+							"    pm.expect(json.message.toLowerCase()).to.include(\"not found\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/products/{{product_id}}\n",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"products",
+						"{{product_id}}\n"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
